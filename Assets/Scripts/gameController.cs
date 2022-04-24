@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-
     [SerializeField]
     private Sprite bgImage;
 
@@ -15,8 +14,6 @@ public class GameController : MonoBehaviour
 
     [SerializeField]
     public GameObject[] models;
-
-
 
     public List<Button> btns = new List<Button>();
 
@@ -35,25 +32,23 @@ public class GameController : MonoBehaviour
         puzzles = Resources.LoadAll<Sprite>("Sprites/Animals");
     }
 
-
-
     void Start()
     {
         getButtons();
         AddListeners();
         AddGamePuzzles();
-
+        Shuffle(gamePuzzles);
+        gameGuesses = gamePuzzles.Count / 2;
     }
 
     void getButtons()
     {
-       
+        GameObject[] objects = GameObject.FindGameObjectsWithTag("PazzleButton");
 
         for (int i = 0; i < objects.Length; i++)
         {
             btns.Add(objects[i].GetComponent<Button>());
             btns[i].image.sprite = bgImage;
-
         }
     }
 
@@ -73,6 +68,7 @@ public class GameController : MonoBehaviour
             index++;
         }
     }
+
     void AddListeners()
     {
         foreach (Button btn in btns)
@@ -80,7 +76,83 @@ public class GameController : MonoBehaviour
             btn.onClick.AddListener(() => pickAGame());
         }
     }
+    public void pickAGame()
+    {
+        if (!firstGuess)
+        {
+            firstGuess = true;
 
+            firstGuessIndex = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
 
+            firstGuessPuzzle = gamePuzzles[firstGuessIndex].name;
 
+            btns[firstGuessIndex].image.sprite = gamePuzzles[firstGuessIndex];
+
+            for (int i = 0; i < models.Length; i++)
+            {
+                if (models[i].name == gamePuzzles[firstGuessIndex].name)
+                {
+                    models[i].SetActive(true);
+                }
+                else
+                {
+                    models[i].SetActive(false);
+                }
+            }
+        }
+        else if (!secondGuess)
+        {
+            secondGuess = true;
+
+            secondGuessIndex = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+
+            secondGuessPuzzle = gamePuzzles[secondGuessIndex].name;
+
+            btns[secondGuessIndex].image.sprite = gamePuzzles[secondGuessIndex];
+
+            for (int i = 0; i < models.Length; i++)
+            {
+                if (models[i].name == gamePuzzles[secondGuessIndex].name)
+                {
+                    models[i].SetActive(true);
+                }
+                else
+                {
+                    models[i].SetActive(false);
+                }
+            }
+
+            countGuesses++;
+
+            StartCoroutine(CheckIfThePuzzlesMatch());
+        }
+    }
+
+    IEnumerator CheckIfThePuzzlesMatch()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (firstGuessPuzzle == secondGuessPuzzle)
+        {
+            yield return new WaitForSeconds(.5f);
+
+            btns[firstGuessIndex].interactable = false;
+            btns[secondGuessIndex].interactable = false;
+
+            btns[firstGuessIndex].image.color = new Color(0, 0, 0, 0);
+            btns[secondGuessIndex].image.color = new Color(0, 0, 0, 0);
+
+            CheckIfTheGameIsFinished();
+        }
+        else
+        {
+            btns[firstGuessIndex].image.sprite = bgImage;
+            btns[secondGuessIndex].image.sprite = bgImage;
+        }
+        yield return new WaitForSeconds(.5f);
+
+        //reset
+        firstGuess = secondGuess = false;
+
+    }
 }
