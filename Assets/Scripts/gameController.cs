@@ -155,4 +155,27 @@ public class GameController : MonoBehaviour
         firstGuess = secondGuess = false;
 
     }
+
+    void CheckIfTheGameIsFinished()
+    {
+        countCorrectGuesses++;
+
+        if (countCorrectGuesses == gameGuesses)
+        {
+            Debug.Log("Game finished");
+            Debug.Log("It took you " + countGuesses + " Many guesses to finish the game");
+        }
+    }
+
+    void Shuffle(List<Sprite> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            Sprite temp = list[i];
+            int randomIndex = Random.Range(i, list.Count);
+            list[i] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+    }
+
 }
